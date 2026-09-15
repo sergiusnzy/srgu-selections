@@ -9,6 +9,14 @@ async function db(path,{method='GET',body}={}){
   return text?JSON.parse(text):null;
 }
 
+function cleanTags(tags){
+  if(!Array.isArray(tags)) return [];
+  return [...new Set(tags.map(t=>String(t||'').trim().replace(/^#+/,'').toLowerCase()).filter(Boolean))].slice(0,20);
+}
+function cleanYear(v){
+  const n=Number(v); return Number.isInteger(n)&&n>=1900&&n<=2100?n:null;
+}
+
 export default async function handler(req,res){
   if(req.method!=='POST') return res.status(405).json({error:'Method not allowed'});
   const {password,action,...payload}=req.body||{};
@@ -21,11 +29,22 @@ export default async function handler(req,res){
       const t=payload.track||{};
       const rows=await db('tracks?select=sort_order&order=sort_order.desc&limit=1');
       const next=(rows?.[0]?.sort_order||0)+10;
-      await db('tracks',{method:'POST',body:{yt:t.yt,title:t.title,artist:t.artist||'',views:t.views||'',own:!!t.own,sort_order:next}});
+      const base={yt:t.yt,title:t.title,artist:t.artist||'',views:t.views||'',own:!!t.own,sort_order:next};
+      const enriched={...base,genre:String(t.genre||'').slice(0,80),mood:String(t.mood||'').slice(0,80),energy:String(t.energy||'').slice(0,40),origin:String(t.origin||'').slice(0,80),release_year:cleanYear(t.release_year),tags:cleanTags(t.tags),curator_note:String(t.curator_note||'').slice(0,500)};
+      try{await db('tracks',{method:'POST',body:enriched});}
+      catch(e){
+        if(/column|schema cache|release_year|curator_note|genre|mood|energy|origin|tags/i.test(String(e.message||''))) await db('tracks',{method:'POST',body:base});
+        else throw e;
+      }
       return res.status(200).json({ok:true});
     }
     if(action==='updateTrack'){
-      await db(`tracks?id=eq.${encodeURIComponent(payload.id)}`,{method:'PATCH',body:payload.patch||{}});
+      const patch=payload.patch||{};
+      const allowed={};
+      for(const k of ['title','artist','views','own','sort_order','genre','mood','energy','origin','curator_note']) if(k in patch) allowed[k]=patch[k];
+      if('release_year' in patch) allowed.release_year=cleanYear(patch.release_year);
+      if('tags' in patch) allowed.tags=cleanTags(patch.tags);
+      await db(`tracks?id=eq.${encodeURIComponent(payload.id)}`,{method:'PATCH',body:allowed});
       return res.status(200).json({ok:true});
     }
     if(action==='deleteTrack'){
