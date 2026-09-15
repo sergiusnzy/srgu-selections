@@ -13,14 +13,17 @@
 
     function applyCssOrder(){
       const mode=select.value;
-      [...feed.querySelectorAll('.card')].forEach((card,index)=>{
+      const cards=[...feed.querySelectorAll('.card')];
+      cards.forEach((card,index)=>{
         if(!card.dataset.stableOrder) card.dataset.stableOrder=card.dataset.curatedOrder||String(index);
-        if(mode==='curated') card.style.order=Number(card.dataset.stableOrder)||0;
-        else {
-          const ts=Date.parse(card.dataset.created||'')||0;
-          card.style.order=mode==='newest'?-ts:ts;
-        }
       });
+      const ranked=[...cards].sort((a,b)=>{
+        if(mode==='curated') return Number(a.dataset.stableOrder)-Number(b.dataset.stableOrder);
+        const at=Date.parse(a.dataset.created||'')||0;
+        const bt=Date.parse(b.dataset.created||'')||0;
+        return mode==='newest'?bt-at:at-bt;
+      });
+      ranked.forEach((card,index)=>{card.style.order=String(index)});
     }
     select.addEventListener('change',applyCssOrder);
     new MutationObserver(()=>requestAnimationFrame(applyCssOrder)).observe(feed,{childList:true});
