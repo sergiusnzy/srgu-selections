@@ -61,6 +61,29 @@ export default async function handler(req,res){
       await db('site_config?id=eq.main',{method:'PATCH',body:{ad_active:!!a.active,ad_title:a.title||'',ad_desc:a.desc||'',ad_img:a.img||'',ad_url:a.url||''}});
       return res.status(200).json({ok:true});
     }
+    if(action==='listSubmissions'){
+      const rows=await db('submissions?status=eq.pending&select=*&order=created_at.desc&limit=200');
+      return res.status(200).json({ok:true,submissions:rows||[]});
+    }
+    if(action==='approveSubmission'){
+      const id=String(payload.id||'');
+      const rows=await db(`submissions?id=eq.${encodeURIComponent(id)}&status=eq.pending&select=*&limit=1`);
+      const s=rows?.[0];
+      if(!s) return res.status(404).json({error:'Recomandarea nu mai este disponibilă'});
+      const exists=await db(`tracks?yt=eq.${encodeURIComponent(s.yt)}&select=id&limit=1`);
+      if(!exists?.length){
+        const orderRows=await db('tracks?select=sort_order&order=sort_order.desc&limit=1');
+        const next=(orderRows?.[0]?.sort_order||0)+10;
+        await db('tracks',{method:'POST',body:{yt:s.yt,title:s.title||'Fără titlu',artist:s.artist||'Necunoscut',views:'',own:false,sort_order:next,genre:'',mood:'',energy:'',origin:'',release_year:null,tags:[],curator_note:''}});
+      }
+      await db(`submissions?id=eq.${encodeURIComponent(id)}`,{method:'PATCH',body:{status:'published',reviewed_at:new Date().toISOString()}});
+      return res.status(200).json({ok:true,alreadyExists:!!exists?.length});
+    }
+    if(action==='rejectSubmission'){
+      const id=String(payload.id||'');
+      await db(`submissions?id=eq.${encodeURIComponent(id)}`,{method:'PATCH',body:{status:'rejected',reviewed_at:new Date().toISOString()}});
+      return res.status(200).json({ok:true});
+    }
     return res.status(400).json({error:'Acțiune necunoscută'});
   }catch(e){return res.status(500).json({error:e.message||'Eroare server'});}
 }
