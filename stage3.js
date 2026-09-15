@@ -20,6 +20,9 @@ function allTrackMeta(){
 }
 
 function ensureUi(){
+  if(!document.querySelector('link[href="/stage3.css"]')){
+    const l=document.createElement('link');l.rel='stylesheet';l.href='/stage3.css';document.head.append(l);
+  }
   if(!$('#saveCurrentBtn')){
     const b=document.createElement('button');b.id='saveCurrentBtn';b.className='save-current';b.type='button';b.textContent='+ Salvează';
     $('#subBtn')?.insertAdjacentElement('afterend',b);
@@ -27,6 +30,37 @@ function ensureUi(){
   if(!$('#playlistLibraryBtn')){
     const b=document.createElement('button');b.id='playlistLibraryBtn';b.className='library-btn';b.type='button';b.textContent='▣ Playlisturile mele';
     $('.smart-toolbar')?.append(b);
+  }
+  if(!$('#playlistPickerModal')){
+    document.body.insertAdjacentHTML('beforeend',`
+      <div class="modal" id="playlistPickerModal" aria-hidden="true">
+        <button class="backdrop" data-playlist-close="playlistPickerModal" aria-label="Închide"></button>
+        <section class="dialog small">
+          <div class="modal-head"><div><span class="eyebrow">Colecția ta</span><h3>Salvează în playlist</h3></div><button class="round" data-playlist-close="playlistPickerModal">×</button></div>
+          <div class="admin-scroll">
+            <div class="playlist-picker-track" id="playlistTrackPreview"></div>
+            <form class="playlist-create" id="playlistCreateForm"><input id="playlistName" type="text" maxlength="50" placeholder="Ex. Night Drive" required><button class="btn solid" type="submit">+ Playlist nou</button></form>
+            <div id="playlistChoices"></div>
+            <p class="hint">Playlisturile se păstrează doar în acest browser. Nu ai nevoie de cont.</p>
+          </div>
+        </section>
+      </div>`);
+  }
+  if(!$('#playlistLibraryModal')){
+    document.body.insertAdjacentHTML('beforeend',`
+      <div class="modal" id="playlistLibraryModal" aria-hidden="true">
+        <button class="backdrop" data-playlist-close="playlistLibraryModal" aria-label="Închide"></button>
+        <section class="dialog small">
+          <div class="modal-head"><div><span class="eyebrow">Fără cont</span><h3>Playlisturile mele</h3></div><button class="round" data-playlist-close="playlistLibraryModal">×</button></div>
+          <div class="admin-scroll">
+            <div class="playlist-section-title"><h4>Biblioteca ta</h4><span id="playlistCount">0 playlisturi</span></div>
+            <form class="playlist-create" id="playlistLibraryCreateForm"><input id="playlistLibraryName" type="text" maxlength="50" placeholder="Playlist nou" required><button class="btn solid" type="submit">Creează</button></form>
+            <div class="playlist-list" id="playlistList"></div>
+            <div class="playlist-backup"><button id="playlistExport" type="button">Copiază backup</button><button id="playlistReset" type="button">Șterge toate</button></div>
+            <p class="hint">Playlisturile sunt private și rămân pe dispozitivul tău. Mai târziu putem adăuga și share prin link, fără login.</p>
+          </div>
+        </section>
+      </div>`);
   }
 }
 
