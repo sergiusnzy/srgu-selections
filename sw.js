@@ -1,4 +1,4 @@
-const CACHE='srgu-shell-v3';
+const CACHE='srgu-shell-v4';
 const SHELL=[
   '/',
   '/index.html',
@@ -9,6 +9,7 @@ const SHELL=[
   '/stage5.css',
   '/stage7.css',
   '/stage8.css',
+  '/seo.css',
   '/legal.css',
   '/about.html',
   '/contact.html',
@@ -25,7 +26,8 @@ const SHELL=[
   '/adsense-config.js',
   '/stage7.js',
   '/manifest.webmanifest',
-  '/srgu-icon.svg'
+  '/srgu-icon.svg',
+  '/og-card.svg'
 ];
 
 self.addEventListener('install',event=>{
