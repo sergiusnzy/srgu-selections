@@ -1,4 +1,4 @@
-const CACHE='srgu-shell-v2';
+const CACHE='srgu-shell-v3';
 const SHELL=[
   '/',
   '/index.html',
@@ -8,6 +8,12 @@ const SHELL=[
   '/stage4.css',
   '/stage5.css',
   '/stage7.css',
+  '/stage8.css',
+  '/legal.css',
+  '/about.html',
+  '/contact.html',
+  '/privacy.html',
+  '/terms.html',
   '/app.js',
   '/ux-2026.js',
   '/stage2.js',
@@ -44,9 +50,9 @@ self.addEventListener('fetch',event=>{
     event.respondWith(
       fetch(req).then(res=>{
         const copy=res.clone();
-        caches.open(CACHE).then(cache=>cache.put('/',copy));
+        caches.open(CACHE).then(cache=>cache.put(url.pathname==='/'?'/':url.pathname,copy));
         return res;
-      }).catch(()=>caches.match('/'))
+      }).catch(()=>caches.match(url.pathname).then(r=>r||caches.match('/')))
     );
     return;
   }
