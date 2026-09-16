@@ -7,6 +7,15 @@ const parseYT=s=>{const v=String(s||'').trim();if(/^[A-Za-z0-9_-]{11}$/.test(v))
 let tracks=[];
 let byYt=new Map();
 
+function ensurePwaBoot(){
+  if(!document.querySelector('link[rel="manifest"]')){const l=document.createElement('link');l.rel='manifest';l.href='/manifest.webmanifest';document.head.append(l)}
+  if(!document.querySelector('link[rel="icon"]')){const l=document.createElement('link');l.rel='icon';l.href='/srgu-icon.svg';l.type='image/svg+xml';document.head.append(l)}
+  const metas=[['apple-mobile-web-app-capable','yes'],['apple-mobile-web-app-status-bar-style','black-translucent'],['apple-mobile-web-app-title','SRGU']];
+  metas.forEach(([name,content])=>{if(!document.querySelector(`meta[name="${name}"]`)){const m=document.createElement('meta');m.name=name;m.content=content;document.head.append(m)}});
+  if(!document.querySelector('script[src="/pwa.js"]')){const s=document.createElement('script');s.src='/pwa.js';s.defer=true;document.head.append(s)}
+}
+ensurePwaBoot();
+
 function ensureUi(){
   if(!document.querySelector('link[href="/stage5.css"]')){const l=document.createElement('link');l.rel='stylesheet';l.href='/stage5.css';document.head.append(l)}
   const tab=$('#tab-tracks');if(!tab)return;
