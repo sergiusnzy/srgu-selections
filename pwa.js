@@ -53,7 +53,7 @@ function loadModule(src){
   if(document.querySelector(`script[src="${src}"]`))return;
   const s=document.createElement('script');s.src=src;s.defer=true;document.body.append(s);
 }
-function loadEnhancements(){loadModule('/stage9.js');loadModule('/stage10.js')}
+function loadEnhancements(){loadModule('/stage9.js');loadModule('/stage10.js');loadModule('/stage11.js')}
 
 function ensureUi(){
   ensureSeo();ensureFooter();loadEnhancements();
