@@ -49,9 +49,13 @@ function ensureFooter(){
   const main=$('main.main');if(!main)return;
   main.insertAdjacentHTML('beforeend',`<footer class="site-footer"><div class="site-footer-in"><div class="site-footer-brand">SRGU SELECTIONS · CURATED BY EAR</div><nav class="site-footer-links" aria-label="Informații"><a href="/about.html">Despre</a><a href="/contact.html">Contact</a><a href="/privacy.html">Confidențialitate</a><a href="/terms.html">Termeni</a></nav></div></footer>`);
 }
+function loadDiscovery(){
+  if(document.querySelector('script[src="/stage9.js"]'))return;
+  const s=document.createElement('script');s.src='/stage9.js';s.defer=true;document.body.append(s);
+}
 
 function ensureUi(){
-  ensureSeo();ensureFooter();
+  ensureSeo();ensureFooter();loadDiscovery();
   if(standalone()) return;
   if(!$('#installAppBtn')){
     const b=document.createElement('button');
