@@ -5,6 +5,17 @@ const validClient=v=>/^ca-pub-\d+$/.test(String(v||'').trim());
 const validSlot=v=>/^\d+$/.test(String(v||'').trim());
 let scriptLoaded=false;
 
+function ensureFooter(){
+  if(!document.querySelector('link[href="/stage8.css"]')){
+    const l=document.createElement('link');l.rel='stylesheet';l.href='/stage8.css';document.head.append(l);
+  }
+  if(document.querySelector('.site-footer'))return;
+  const main=document.querySelector('main');if(!main)return;
+  const footer=document.createElement('footer');footer.className='site-footer';
+  footer.innerHTML=`<div class="shell site-footer-inner"><div class="site-footer-brand"><strong>SRGU SELECTIONS</strong><span>curated by ear · independent music discovery</span></div><nav class="site-footer-links" aria-label="Informații"><a href="/about.html">Despre</a><a href="/contact.html">Contact</a><a href="/privacy.html">Confidențialitate</a><a href="/terms.html">Termeni</a></nav><div class="site-footer-copy">© 2026 SRGU Selections · Conținutul YouTube aparține creatorilor și titularilor săi de drepturi.</div></div>`;
+  main.insertAdjacentElement('afterend',footer);
+}
+
 function loadAdsense(){
   if(scriptLoaded||!validClient(cfg.client))return;
   scriptLoaded=true;
@@ -38,6 +49,7 @@ function mountFeed(){
   const anchor=cards[Math.min(5,cards.length-1)];anchor.insertAdjacentElement('afterend',wrap);requestAd(wrap.querySelector('ins'));
 }
 function init(){
+  ensureFooter();
   if(!cfg.enabled||!validClient(cfg.client))return;
   if(!validSlot(cfg.slots?.discovery)&&!validSlot(cfg.slots?.feed))return;
   loadAdsense();mountDiscovery();mountFeed();
