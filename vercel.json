@@ -1,6 +1,9 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [
+    {"source": "/t/:id", "destination": "/api/track-page?id=:id"}
+  ],
   "headers": [
     {
       "source": "/(.*)",
