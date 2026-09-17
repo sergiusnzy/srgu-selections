@@ -49,11 +49,10 @@ function ensureFooter(){
   const main=$('main.main');if(!main)return;
   main.insertAdjacentHTML('beforeend',`<footer class="site-footer"><div class="site-footer-in"><div class="site-footer-brand">SRGU SELECTIONS · CURATED BY EAR</div><nav class="site-footer-links" aria-label="Informații"><a href="/about.html">Despre</a><a href="/contact.html">Contact</a><a href="/privacy.html">Confidențialitate</a><a href="/terms.html">Termeni</a></nav></div></footer>`);
 }
-function loadModule(src){
-  if(document.querySelector(`script[src="${src}"]`))return;
-  const s=document.createElement('script');s.src=src;s.defer=true;document.body.append(s);
+function loadEnhancements(){
+  if(document.querySelector('script[src="/enhancements.js"]'))return;
+  const s=document.createElement('script');s.src='/enhancements.js';s.defer=true;document.body.append(s);
 }
-function loadEnhancements(){loadModule('/stage9.js');loadModule('/stage10.js');loadModule('/stage11.js');loadModule('/stage12.js');loadModule('/stage13.js');loadModule('/stage14.js');loadModule('/stage15.js')}
 
 function ensureUi(){
   ensureSeo();ensureFooter();loadEnhancements();
