@@ -1,4 +1,4 @@
-const CACHE='srgu-shell-v12';
+const CACHE='srgu-shell-v13';
 const SHELL=[
   '/',
   '/index.html',
@@ -24,6 +24,8 @@ const SHELL=[
   '/terms.html',
   '/app.js',
   '/ux-2026.js',
+  '/supabase-fetch-fix.js',
+  '/server-read-shim.js',
   '/stage2.js',
   '/stage2-guard.js',
   '/stage3.js',
@@ -39,45 +41,51 @@ const SHELL=[
 ];
 
 self.addEventListener('install',event=>{
-  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));
+  event.waitUntil((async()=>{
+    const cache=await caches.open(CACHE);
+    await Promise.allSettled(SHELL.map(asset=>cache.add(asset)));
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate',event=>{
-  event.waitUntil(
-    caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())
-  );
+  event.waitUntil((async()=>{
+    const keys=await caches.keys();
+    await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));
+    await self.clients.claim();
+  })());
 });
 
 self.addEventListener('fetch',event=>{
   const req=event.request;
-  if(req.method!=='GET') return;
+  if(req.method!=='GET')return;
   const url=new URL(req.url);
-
-  if(url.origin!==self.location.origin) return;
-  if(url.pathname.startsWith('/api/')) return;
+  if(url.origin!==self.location.origin||url.pathname.startsWith('/api/'))return;
 
   if(req.mode==='navigate'){
-    event.respondWith(
-      fetch(req).then(res=>{
-        if(url.pathname.startsWith('/t/')) return res;
-        const copy=res.clone();
-        caches.open(CACHE).then(cache=>cache.put(url.pathname==='/'?'/':url.pathname,copy));
+    event.respondWith((async()=>{
+      try{
+        const res=await fetch(req);
+        if(!url.pathname.startsWith('/t/')&&res.ok){
+          const cache=await caches.open(CACHE);
+          cache.put(url.pathname==='/'?'/':url.pathname,res.clone());
+        }
         return res;
-      }).catch(()=>caches.match(url.pathname).then(r=>r||caches.match('/')))
-    );
+      }catch{
+        return (await caches.match(url.pathname))||(await caches.match('/'));
+      }
+    })());
     return;
   }
 
   if(/\.(?:css|js|svg|webmanifest)$/.test(url.pathname)){
-    event.respondWith(
-      caches.match(req).then(cached=>{
-        const fresh=fetch(req).then(res=>{
-          const copy=res.clone();
-          caches.open(CACHE).then(cache=>cache.put(req,copy));
-          return res;
-        }).catch(()=>cached);
-        return cached||fresh;
-      })
-    );
+    event.respondWith((async()=>{
+      const cached=await caches.match(req);
+      const fresh=fetch(req).then(async res=>{
+        if(res.ok){const cache=await caches.open(CACHE);cache.put(req,res.clone())}
+        return res;
+      }).catch(()=>null);
+      return cached||(await fresh)||new Response('',{status:504,statusText:'Offline'});
+    })());
   }
 });
