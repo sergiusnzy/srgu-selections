@@ -1,4 +1,4 @@
-const CACHE='srgu-shell-v10';
+const CACHE='srgu-shell-v11';
 const SHELL=[
   '/',
   '/index.html',
@@ -14,6 +14,7 @@ const SHELL=[
   '/stage11.css',
   '/stage12.css',
   '/stage13.css',
+  '/stage15.css',
   '/track.css',
   '/seo.css',
   '/legal.css',
@@ -34,6 +35,7 @@ const SHELL=[
   '/stage12.js',
   '/stage13.js',
   '/stage14.js',
+  '/stage15.js',
   '/pwa.js',
   '/adsense-config.js',
   '/stage7.js',
